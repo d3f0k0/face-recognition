@@ -1,0 +1,9 @@
+{
+  "name": "attendance-rewrite",
+  "slug": "attendance-rewrite",
+  "plugins": [
+    "expo-router"
+  ],
+  "scheme":"attendance",
+  "newArchEnabled": true
+}
