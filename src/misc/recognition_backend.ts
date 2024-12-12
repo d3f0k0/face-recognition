@@ -2,7 +2,7 @@ import {readAsStringAsync, EncodingType} from 'expo-file-system';
 import {fetch} from 'expo/fetch'; // Correct import
 
 
-const url = "https://politicians-selecting-luxembourg-dt.trycloudflare.com"
+const url = "https://rugby-viewer-cooked-bouquet.trycloudflare.com"
 
 export const getEmbeddings = async (imageUri) => {
   const base64Image = await readAsStringAsync(imageUri, {
@@ -26,7 +26,7 @@ export const getEmbeddings = async (imageUri) => {
       return null;
     }
     const data = await response.json();
-    return data.embedding;
+    return [data.embedding, data.face];
   } catch (error) {
     console.error("Error during fetch:", error.message);
   }

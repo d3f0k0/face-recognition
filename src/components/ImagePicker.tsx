@@ -56,7 +56,7 @@ export default function ImagePickerComponent({ image, setImage }: ImagePickerPro
           <Image source={{ uri: image }} style={styles.image} />
           <Button label="Remove Image" 
             onPress={() => setImage(null)} 
-            style={styles.button_remove} 
+            color={styles.button_remove} 
             icon={<Ionicons name="close" size={24} color="black" />}
             />
         </>

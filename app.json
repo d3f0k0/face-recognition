@@ -5,5 +5,9 @@
     "expo-router"
   ],
   "scheme":"attendance",
-  "newArchEnabled": true
+  "newArchEnabled": true,
+  "androidStatusBar": {
+      "backgroundColor": "#FFFFFF",
+      "translucent": false
+    }
 }

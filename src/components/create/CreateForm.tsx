@@ -3,13 +3,15 @@ import { StyleSheet, View, TextInput } from 'react-native';
 type CreateFormType = {
   placeholder: string;
   onChange?: any;
+  formStyle?: any
 };
 
-export default function CreateForm({ placeholder, onChange }: CreateFormType) {
+export default function CreateForm({ placeholder, onChange, formStyle }: CreateFormType) {
     return (
       <View
         style={[
           styles.formContainer,
+          formStyle
           //{borderColor: "#333", borderRadius: 10, borderWidth: 1},
         ]}>
         <TextInput style={[styles.form, { backgroundColor: '#fff' }]}

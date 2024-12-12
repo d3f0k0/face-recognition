@@ -27,6 +27,7 @@ export default function Result() {
     const [classData, setClassData] = useState<ClassCardType | null>();
     const [studentData, setStudentData] = useState<StudentType[] | null>();
     const [resultData, setResultData] = useState<ResultType[] | null>();
+    const [listResult, setListResult] = useState<number[]>([]);
     const loadData = useCallback(async () => {
         try {
             setLoading(true);
@@ -44,9 +45,18 @@ export default function Result() {
             const resultListData = JSON.parse(await AsyncStorage.getItem("temp_results"));
             if (resultListData) {
                 setResultData(resultListData);
+                const list_result_temp = resultListData.map(
+                    (result: ResultType) => {
+                            parseInt(result.best_match?.name)
+                        
+                    }
+                );
+                setListResult(list_result_temp);
+                console.log(list_result_temp)
             } else {
                 setResultData([]);
             }
+
 
         } catch (error) {
 
@@ -70,34 +80,45 @@ export default function Result() {
     }
     return (
         <View style={{ flex: 1, padding: 15 }}>
-            <Card style={{}}>
-                <Text style={{ fontSize: 32, fontWeight: 'bold', textAlign: 'center' }}>
-                    {classData?.name}
-                </Text>
-                <Text style={{ textAlignVertical: 'auto', textAlign: 'center', marginBottom: 15 }}>
-                    {classData?.description}
-                </Text>
-            </Card>
-
             <ScrollView>
-                {resultData && resultData.map((resultItem, index) => {
-                    return (
+                <Card style={{}}>
+                    <Text style={{ fontSize: 32, fontWeight: 'bold', textAlign: 'center' }}>
+                        {classData?.name}
+                    </Text>
+                    <Text style={{ textAlignVertical: 'auto', textAlign: 'center', marginBottom: 15 }}>
+                        {classData?.description}
+                    </Text>
+                    <View
+                        style={{
+                            width: "100%",
+                            alignItems: "center",
+                        }}
+                    >
+                        <Button label="Detailed Result"
+                            onPress={async () => {
+                                router.navigate(`/${id}/detect_result`)
+                            }}
+                            style={{
+                                alignItems: 'center',
+                                marginHorizontal: 0,
+                            }} />
+                    </View>
+                </Card>
+                {studentData && studentData
+                    .filter((student) => !listResult.includes(student.id))
+                    .map((student, index) => (
                         <View key={index}>
                             <Card style={styles.card}>
                                 <View style={styles.cardContent}>
-                                    <Image source={{ uri: resultItem.face }} style={styles.image} />
-                                    {resultItem.best_match?(
-                                            <View>
-                                                <Text>{resultItem.best_match.name}</Text>
-                                                <Text>{resultItem.best_match.similarity}</Text>
-                                            </View>
-                                        ) : (
-                                            <Text>No matches found</Text>) }
+                                    <Image source={{ uri: student.image }} style={styles.image} />
+                                    <View>
+                                        <Text>{student.name}</Text>
+                                        <Text>{student.id}</Text>
+                                    </View>
                                 </View>
                             </Card>
                         </View>
-                    )
-                })}
+                    ))}
             </ScrollView>
             <View
                 style={{
@@ -107,35 +128,42 @@ export default function Result() {
                     alignItems: "center",
                 }}
             >
-                <Button label="return" onPress={async () => {
-                    await AsyncStorage.setItem("temp_results", null)
-                    router.back()
-                    
-                }}/>
+                <Button label="return"
+                    onPress={async () => {
+                        await AsyncStorage.setItem("temp_results", null)
+                        router.back()
+                    }}
+                    style={{
+                        alignItems: 'center',
+                        marginHorizontal: 0,
+                    }} />
             </View>
-        
+
+
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     card: {
-      marginBottom: 15, // Optional margin for spacing between cards
-      paddingHorizontal: 10, // Padding inside the card for spacing
-      paddingVertical: 15, // Optional padding for height balance
+        marginBottom: 15, // Optional margin for spacing between cards
+        paddingHorizontal: 10, // Padding inside the card for spacing
+        paddingVertical: 15, // Optional padding for height balance
     },
     cardContent: {
-      flexDirection: 'row', // Align text, image, and icon horizontally
-      alignItems: 'center', // Vertically center the content
-      justifyContent: 'space-between', // Spread content evenly
+        flexDirection: 'row', // Align text, image, and icon horizontally
+        alignItems: 'center', // Vertically center the content
+        justifyContent: 'space-between', // Spread content evenly
     },
     text: {
-      fontSize: 18,
-      flex: 1, // Allow the text to take up remaining space
-      marginLeft: 10, // Adds space between the image and the text
+        fontSize: 18,
+        flex: 1, // Allow the text to take up remaining space
+        marginLeft: 10, // Adds space between the image and the text
     },
     image: {
-      width: 80, // Size of the image
-      height: 80,
-      borderRadius: 3,
-    }})
+        width: 80, // Size of the image
+        height: 80,
+        borderRadius: 3,
+    }
+
+})

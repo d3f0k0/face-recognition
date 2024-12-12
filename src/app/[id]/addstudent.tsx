@@ -7,6 +7,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import ImagePickerComponent from "../../components/ImagePicker";
 import { getEmbeddings } from "../../misc/recognition_backend";
 import Spinner from "../../components/Spinner";
+import { saveBase64ToFile } from "../../misc/result_process";
 
 export default function AddStudent() {
     const { id } = useLocalSearchParams()
@@ -15,7 +16,7 @@ export default function AddStudent() {
     const [loading, setLoading] = useState(false);
     const tableID = "table_" + id
 
-    const addStudentAsync = async (name: string, image: string, hadEmbedding: boolean, embedding?: any) => {
+    const addStudentAsync = async (name: string, image: string, hadEmbedding: boolean, embedding?: any, embeddingFace?: any) => {
         try {
             const valueString = await AsyncStorage.getItem(tableID);
             const value = valueString ? JSON.parse(valueString) : [];
@@ -24,7 +25,8 @@ export default function AddStudent() {
                 name: name,
                 image: image,
                 hadEmbedding: hadEmbedding,
-                embedding: hadEmbedding ? embedding : ''
+                embedding: hadEmbedding ? embedding : '',
+                embeddingFace: hadEmbedding ? embeddingFace : ''
             });
             await AsyncStorage.setItem(tableID, JSON.stringify(value));
         } catch (e) {
@@ -75,7 +77,7 @@ export default function AddStudent() {
                             let embedding = await getEmbeddings(image)
                             console.log(embedding)
                             if (embedding != null) {
-                                await addStudentAsync(name, image, true, embedding);
+                                await addStudentAsync(name, image, true, embedding[0], await saveBase64ToFile(embedding[1], `${name}.jpg`));
                                 setName("");
                                 router.back();
                             }

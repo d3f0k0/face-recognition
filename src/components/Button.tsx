@@ -4,17 +4,18 @@ type ButtonTypes = {
     label: string;
     icon?: any;
     onPress?: any;
-    style?: any
+    style?: any;
+    color?: any
 };
 
-export default function Button({ label, icon, onPress, style }: ButtonTypes) {
+export default function Button({ label, icon, onPress, style, color }: ButtonTypes) {
     return (
         <View
             style={[
                 styles.buttonContainer,
                 style
             ]}>
-            <TouchableOpacity style={[styles.button, style ]} onPress={onPress}>
+            <TouchableOpacity style={[styles.button, color ]} onPress={onPress}>
                 <View style={[styles.buttonIcon, style]}>{icon}</View>
                 <Text style={[styles.buttonLabel, { color: '#25292e' }, style]}>{label}</Text>
             </TouchableOpacity>

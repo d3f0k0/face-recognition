@@ -23,3 +23,5 @@ export const saveBase64ToFile = async (base64String, fileName = "image.jpg") => 
     throw error;
   }
 };
+
+
