@@ -45,14 +45,20 @@ export default function Result() {
             const resultListData = JSON.parse(await AsyncStorage.getItem("temp_results"));
             if (resultListData) {
                 setResultData(resultListData);
-                const list_result_temp = resultListData.map(
-                    (result: ResultType) => {
-                            parseInt(result.best_match?.name)
-                        
+
+                // Safely map through results and handle `0` as a valid name
+                const list_result_temp = resultListData.map((result: ResultType) => {
+                    // Ensure `best_match` exists and `name` is valid (including `0`)
+                    if (result.best_match && result.best_match.name !== undefined && result.best_match.name !== null) {
+                        const parsedName = parseInt(result.best_match.name);
+                        return !isNaN(parsedName) ? parsedName : null; // Return `null` if parsing fails
                     }
-                );
+                    return null; // Return `null` if `best_match` or `name` is missing
+                });
+
                 setListResult(list_result_temp);
-                console.log(list_result_temp)
+                console.log(list_result_temp);
+
             } else {
                 setResultData([]);
             }
