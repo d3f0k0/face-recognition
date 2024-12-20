@@ -2,7 +2,7 @@ import {readAsStringAsync, EncodingType} from 'expo-file-system';
 import {fetch} from 'expo/fetch'; // Correct import
 
 
-const url = "https://breed-attachments-initiatives-km.trycloudflare.com"
+const url = "http://10.88.0.13:5100"
 
 export const getEmbeddings = async (imageUri) => {
   const base64Image = await readAsStringAsync(imageUri, {

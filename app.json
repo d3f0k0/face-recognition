@@ -4,10 +4,36 @@
   "plugins": [
     "expo-router"
   ],
-  "scheme":"attendance",
+  "scheme": "attendance",
   "newArchEnabled": true,
   "androidStatusBar": {
-      "backgroundColor": "#FFFFFF",
-      "translucent": false
+    "backgroundColor": "#FFFFFF",
+    "translucent": false
+  },
+  "extra": {
+    "router": {
+      "origin": false
+    },
+    "eas": {
+        "projectId": "1176078f-972f-4317-971d-3a790d2a8151"
     }
+  },
+  "android": {
+      "package": "com.defoko.facerecognitionapp",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+  },
+
+  "ios": {
+      "bundleIdentifier": "com.defoko.facerecognitionapp"
+  },
+  "owner": "defoko",
+  "splash": {
+      "image": "./src/assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+  },
+  
 }
