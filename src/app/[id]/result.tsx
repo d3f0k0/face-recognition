@@ -1,12 +1,13 @@
 import { View, Text, ScrollView, StyleSheet, Image } from "react-native";
 import Card from "../../components/Card";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "expo-sqlite/kv-store";
 import { useState, useCallback, useEffect } from "react";
 import { ClassCardType } from "../../components/ClassCard";
 import { StudentType } from ".";
 import { saveBase64ToFile } from "../../misc/result_process";
 import Button from "../../components/Button";
+import { useTranslation } from "react-i18next";
 
 export interface ResultType {
     face: any
@@ -20,7 +21,7 @@ interface MatchType {
 
 
 export default function Result() {
-
+    const { t } = useTranslation()
     const { id } = useLocalSearchParams();
     const tableID = "table_" + id;
     const [loading, setLoading] = useState(true);
@@ -80,19 +81,38 @@ export default function Result() {
     if (loading) {
         return (
             <View>
+                <Stack.Screen
+                    options={{
+                        title: t('class.result')
+                    }}
+                />
                 <Text>Loading...</Text>
             </View>
         );
     }
     return (
         <View style={{ flex: 1, padding: 15 }}>
+            <Stack.Screen
+                options={{
+                    title: t('class.result.title')
+                }}
+            />
             <ScrollView>
                 <Card style={{}}>
                     <Text style={{ fontSize: 32, fontWeight: 'bold', textAlign: 'center' }}>
                         {classData?.name}
                     </Text>
-                    <Text style={{ textAlignVertical: 'auto', textAlign: 'center', marginBottom: 15 }}>
+                    {classData?.description? (<Text style={{ textAlignVertical: 'auto', textAlign: 'center', marginBottom: 15 }}>
                         {classData?.description}
+                    </Text>) : <View></View>}
+                    <Text style={{ fontSize: 24, textAlignVertical: 'auto', textAlign: 'center', marginBottom: 0 }}>
+                        {t('class.result.total')}: {studentData.length}
+                    </Text>
+                    <Text style={{ fontSize: 24, textAlignVertical: 'auto', textAlign: 'center', marginBottom: 0 }}>
+                        {t('class.result.amount')}: {resultData.length}
+                    </Text>
+                    <Text style={{ fontSize: 24, textAlignVertical: 'auto', textAlign: 'center', marginBottom: 15 }}>
+                        {t('class.result.absence')}: {studentData.length - resultData.length}
                     </Text>
                     <View
                         style={{
@@ -100,7 +120,7 @@ export default function Result() {
                             alignItems: "center",
                         }}
                     >
-                        <Button label="Detailed Result"
+                        <Button label={t('class.detect_result')}
                             onPress={async () => {
                                 router.navigate(`/${id}/detect_result`)
                             }}

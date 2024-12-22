@@ -2,7 +2,8 @@
   "name": "attendance-rewrite",
   "slug": "attendance-rewrite",
   "plugins": [
-    "expo-router"
+    "expo-router",
+    "expo-localization"
   ],
   "scheme": "attendance",
   "newArchEnabled": true,
@@ -15,25 +16,23 @@
       "origin": false
     },
     "eas": {
-        "projectId": "1176078f-972f-4317-971d-3a790d2a8151"
+      "projectId": "1176078f-972f-4317-971d-3a790d2a8151"
     }
   },
   "android": {
-      "package": "com.defoko.facerecognitionapp",
-      "adaptiveIcon": {
-        "foregroundImage": "./src/assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+    "package": "com.defoko.facerecognitionapp",
+    "adaptiveIcon": {
+      "foregroundImage": "./src/assets/images/adaptive-icon.png",
+      "backgroundColor": "#ffffff"
+    }
   },
-
   "ios": {
-      "bundleIdentifier": "com.defoko.facerecognitionapp"
+    "bundleIdentifier": "com.defoko.facerecognitionapp"
   },
   "owner": "defoko",
   "splash": {
-      "image": "./src/assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-  },
-  
+    "image": "./src/assets/images/splash.png",
+    "resizeMode": "contain",
+    "backgroundColor": "#ffffff"
+  }
 }

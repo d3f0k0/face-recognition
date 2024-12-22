@@ -4,8 +4,11 @@ import CreateForm from "../components/create/CreateForm";
 import { useState } from "react";
 import { AsyncStorage } from "expo-sqlite/kv-store";
 import { router } from "expo-router";
+import {useTranslation} from 'react-i18next'
 
 export default function Create() {
+  const {t} = useTranslation();
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
@@ -42,11 +45,11 @@ export default function Create() {
         }}
       >
         <CreateForm
-          placeholder={"Name"}
+          placeholder={t('create.class.name')}
           onChange={(name) => setName(name)}
         />
         <CreateForm
-          placeholder={"Description"}
+          placeholder={t('create.class.description')}
           onChange={(description) => setDescription(description)}
         />
       </View>

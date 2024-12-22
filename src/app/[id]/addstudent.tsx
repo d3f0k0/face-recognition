@@ -3,13 +3,15 @@ import CreateButton from "../../components/create/CreateButton";
 import CreateForm from "../../components/create/CreateForm";
 import { useState } from "react";
 import { AsyncStorage } from "expo-sqlite/kv-store";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import ImagePickerComponent from "../../components/ImagePicker";
-import { getEmbeddings } from "../../misc/recognition_backend";
+import { getEmbeddings, getEmbeddingsCompressed } from "../../misc/recognition_backend";
 import Spinner from "../../components/Spinner";
 import { saveBase64ToFile } from "../../misc/result_process";
+import { useTranslation } from 'react-i18next'
 
 export default function AddStudent() {
+    const { t } = useTranslation()
     const { id } = useLocalSearchParams()
     const [name, setName] = useState("");
     const [image, setImage] = useState<string | null>(null);
@@ -44,6 +46,11 @@ export default function AddStudent() {
                 position: "relative", // Required for absolute positioning
             }}
         >
+            <Stack.Screen
+                options={{
+                    title: t('create.student.title')
+                }}
+            />
             {/* Centered Content */}
             <View
                 style={{
@@ -52,7 +59,7 @@ export default function AddStudent() {
                 }}
             >
                 <CreateForm
-                    placeholder={"Name"}
+                    placeholder={t('create.student.name')}
                     onChange={(name) => setName(name)}
                 />
                 <ImagePickerComponent image={image} setImage={setImage} />

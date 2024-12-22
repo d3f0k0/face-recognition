@@ -3,6 +3,7 @@ import { View, Image, StyleSheet, Alert, Modal, Text, TouchableOpacity } from "r
 import Button from "./Button";
 import * as ImagePicker from "expo-image-picker";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useTranslation } from "react-i18next";
 
 interface ImagePickerProps {
   image: string | null; // Current image state
@@ -10,6 +11,8 @@ interface ImagePickerProps {
 }
 
 export default function ImagePickerComponent({ image, setImage }: ImagePickerProps) {
+  const { t } = useTranslation();
+
   const [modalVisible, setModalVisible] = useState(false);
 
   const pickImage = async () => {
@@ -54,7 +57,7 @@ export default function ImagePickerComponent({ image, setImage }: ImagePickerPro
       {image ? (
         <>
           <Image source={{ uri: image }} style={styles.image} />
-          <Button label="Remove Image" 
+          <Button label={t('create.student.remove')} 
             onPress={() => setImage(null)} 
             color={styles.button_remove} 
             icon={<Ionicons name="close" size={24} color="black" />}
@@ -62,7 +65,7 @@ export default function ImagePickerComponent({ image, setImage }: ImagePickerPro
         </>
       ) : (
         <>
-          <Button label="Pick an Image" 
+          <Button label={t('create.student.image_picker')}
             onPress={() => setModalVisible(true)} 
             style={styles.button_add}
             icon={<Ionicons name="images" size={24} color="black" />}

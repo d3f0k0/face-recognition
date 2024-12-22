@@ -1,0 +1,41 @@
+{
+    "tab": { 
+        "home": "Trang Chủ",
+        "settings" : "Cài đặt"
+    },
+    "settings": {
+        "dangerous": "Nguy hiểm!",
+        "delete_everything" : "Xóa hết toàn bộ dữ liệu"
+    },
+    "create" : {
+        "class": {
+            "title": "Tạo thêm lớp",
+            "name": "Tên lớp",
+            "description": "Các mô tả",
+            "create": "Tạo Lớp"
+        },
+        "student": {
+            "title": "Thêm học sinh",
+            "name": "Tên học sinh",
+            "create": "Thêm học sinh",
+            "image_picker": "Chọn ảnh",
+            "remove": "Xóa ảnh"
+        }
+    },
+    "class" : {
+        "modal": {
+            "regenerate": "Regenerate embeddings",
+            "remove":"Xóa học sinh",
+            "view": "Xem ảnh mặt"
+        },
+        "capture": "Điểm danh",
+        "result": {
+            "title": "Kết Quả",
+            "total": "Sỉ số",
+            "amount": "Có mặt",
+            "absence": "Vắng"
+        },
+        "detect_result": "Kết quả phát hiện",
+        "return": "Trở lại"
+    } 
+}

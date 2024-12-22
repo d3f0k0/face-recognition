@@ -1,10 +1,11 @@
 import { View, Text, ScrollView, StyleSheet, Image } from "react-native";
 import Card from "../../components/Card";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "expo-sqlite/kv-store";
 import { useState, useCallback, useEffect } from "react";
 import Button from "../../components/Button";
 import { StudentType } from ".";
+import { useTranslation } from "react-i18next";
 
 export interface ResultType {
     face: any
@@ -18,6 +19,7 @@ interface MatchType {
 
 
 export default function DetectResult() {
+    const {t} = useTranslation()
 
     const { id } = useLocalSearchParams();
     const tableID = "table_" + id;
@@ -62,6 +64,11 @@ export default function DetectResult() {
     }
     return (
         <View style={{ flex: 1, padding: 15 }}>
+            <Stack.Screen
+                    options={{
+                      title: t('class.detect_result')
+                    }}
+            />
             <ScrollView>
                 {resultData && resultData.map((resultItem, index) => {
                     console.log(resultItem)
@@ -94,7 +101,7 @@ export default function DetectResult() {
                     alignItems: "center",
                 }}
             >
-                <Button label="Return To Result" 
+                <Button label={t('class.return')} 
                 onPress={async () => {
                     router.back()
                 }}

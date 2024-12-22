@@ -1,0 +1,41 @@
+{
+    "tab": { 
+        "home": "Home",
+        "settings" : "Settings"
+    },
+    "settings": {
+        "dangerous": "Dangerous!",
+        "delete_everything" : "DELETE EVERYTHING!"
+    },
+    "create" : {
+        "class": {
+            "title": "Add new class",
+            "name": "Name",
+            "description": "Description",
+            "create": "Create"
+        },
+        "student": {
+            "title": "Add new student",
+            "name": "Name",
+            "create": "Create",
+            "image_picker": "Pick an Image",
+            "remove": "Remove Image"
+        }
+    },
+    "class" : {
+        "modal": {
+            "regenerate": "Regenerate embeddings",
+            "remove":"Remove Student",
+            "view": "View Cropped Face"
+        },
+        "capture": "Capture attendance",
+        "result": {
+            "title": "Result",
+            "total": "Total",
+            "amount": "Amount",
+            "absence": "Absence"
+        },
+        "detect_result": "Detect Result",
+        "return": "Return"
+    } 
+}

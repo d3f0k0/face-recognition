@@ -1,4 +1,4 @@
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { router, Stack, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity, Modal, Pressable, Alert } from "react-native";
 import Card from "../../components/Card";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -9,12 +9,13 @@ import Fab from "../../components/Fab";
 import Button from "../../components/Button";
 import { BottomSheetModal, BottomSheetModalProvider, BottomSheetView } from "@gorhom/bottom-sheet";
 import * as ImagePicker from 'expo-image-picker'
-import { getEmbeddings, recognizeWithEmbeddings } from "../../misc/recognition_backend";
+import { getEmbeddings, recognizeWithEmbeddings, recognizeWithEmbeddingsCompressed } from "../../misc/recognition_backend";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Spinner from "../../components/Spinner";
 import { saveBase64ToFile } from "../../misc/result_process";
 import ImageModal from '../../components/class/ImageModel'
 import * as Crypto from 'expo-crypto';
+import { useTranslation } from "react-i18next";
 
 
 export interface StudentType {
@@ -27,6 +28,8 @@ export interface StudentType {
 }
 
 export default function ClassPage() {
+  const {t} = useTranslation()
+
   const { id } = useLocalSearchParams();
   const tableID = "table_" + id;
   const [loading, setLoading] = useState(true);
@@ -181,6 +184,11 @@ export default function ClassPage() {
 
   return (
     <BottomSheetModalProvider>
+      <Stack.Screen
+        options={{
+          title: `${classData?.name}`
+        }}
+      />
       <View style={{ flex: 1, padding: 15 }}>
         <Card style={{}}>
           <Text style={{ fontSize: 32, fontWeight: 'bold', textAlign: 'center' }}>
@@ -192,7 +200,7 @@ export default function ClassPage() {
           <View style={{
             alignItems: 'center', // Centers the button horizontally
           }}>
-            <Button label="Capture attendance"
+            <Button label={t('class.capture')}
               style={{
                 marginHorizontal: 0,
               }} onPress={async () => { takePhoto() }} />
@@ -246,7 +254,7 @@ export default function ClassPage() {
       >
         <BottomSheetView style={styles.contentContainer}>
           <Text>Currently Selected: {currentlyStudent}</Text>
-          <Button label="Regenerate embeddings" onPress={async () => {
+          <Button label={t('class.modal.regenerate')} onPress={async () => {
             const table = JSON.parse(await AsyncStorage.getItem(tableID))
             const selectedStudent = table.find((item) => item.id == currentlyStudent)
             const embedding = await getEmbeddings(selectedStudent.image)
@@ -260,7 +268,7 @@ export default function ClassPage() {
             await AsyncStorage.setItem(tableID, JSON.stringify(newTable))
             await reloadStudentData()
           }} />
-          <Button label="Remove Student" onPress={async () => {
+          <Button label={t('class.modal.remove')} onPress={async () => {
             const table = JSON.parse(await AsyncStorage.getItem(tableID))
             const selectedStudent = table.find((item) => item.id == currentlyStudent)
             let newTable = table.filter((item) => {
@@ -273,7 +281,7 @@ export default function ClassPage() {
             await reloadStudentData()
           }} />
           <Button
-            label="View Cropped Face"
+            label={t('class.modal.view')}
             onPress={async () => {
               const table = JSON.parse(await AsyncStorage.getItem(tableID));
               const selectedStudent = table.find((item) => item.id == currentlyStudent);

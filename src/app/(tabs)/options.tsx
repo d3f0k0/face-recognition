@@ -1,13 +1,20 @@
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Button from '../../components/Button';
 import AsyncStorage from 'expo-sqlite/kv-store';
 import { useState } from 'react';
 import CreateForm from '../../components/create/CreateForm';
+import { useTranslation } from 'react-i18next';
 
 
 export default function Tab() {
+  const {t, i18n} = useTranslation()
   const [apiUrl, setApiUrl] = useState('')
+
+  const changeLanguage = async (lang: string) => {
+    await AsyncStorage.setItem("language", lang);
+    i18n.changeLanguage(lang);
+  };
 
   return (
     <View style={styles.container}>
@@ -23,9 +30,9 @@ export default function Tab() {
         {
             fontSize: 20
         }
-      ]}>Dangerous!</Text>
+      ]}>{t('settings.dangerous')}</Text>
       <Button 
-        label={'DELETE EVERYTHING'} 
+        label={t('settings.delete_everything')} 
         icon={<Ionicons name="trash" size={24} color="white" />}
         onPress={() => Alert.alert("Are you sure?", "You will delete everything!", 
             [{
@@ -43,6 +50,31 @@ export default function Tab() {
         }
         color={styles.delete_button_color}
         />
+        <Text style={[
+        {
+            fontSize: 20
+        }
+      ]}>Language</Text>
+      <View>
+        <TouchableOpacity
+          onPress={() => changeLanguage('en-US')}
+        >
+          <Text style={{
+            fontSize: 40
+          }}>
+          🇺🇸
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => changeLanguage('vi-VN')}
+        >
+          <Text style={{
+            fontSize: 40
+          }}>
+          🇻🇳
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
