@@ -1,15 +1,28 @@
+import { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import Button from '../../components/Button';
 import AsyncStorage from 'expo-sqlite/kv-store';
-import { useState } from 'react';
-import CreateForm from '../../components/create/CreateForm';
 import { useTranslation } from 'react-i18next';
+
+import CreateForm from '../../components/create/CreateForm';
+import Button from '../../components/Button';
+import { dropDatabasePLEASEUSECAREFULLY } from "../../misc/database"
 
 
 export default function Tab() {
   const {t, i18n} = useTranslation()
   const [apiUrl, setApiUrl] = useState('')
+
+  const [apiPlaceholder, setApiPlaceholder] = useState('')
+
+  const getPlaceholder = useCallback(async () => {
+    const apiPlaceholderText = await AsyncStorage.getItemAsync("apiKey")
+    setApiPlaceholder(apiPlaceholderText)
+   }, [])
+   
+  useEffect(() => {
+    getPlaceholder()
+  }, [getPlaceholder])
 
   const changeLanguage = async (lang: string) => {
     await AsyncStorage.setItem("language", lang);
@@ -24,7 +37,7 @@ export default function Tab() {
         }
       ]}>Set Api URL:</Text>
       <CreateForm 
-        placeholder={''} 
+        placeholder={apiPlaceholder} 
         onChange={(url) => {setApiUrl(url)}}/>
       <Text style={[
         {
@@ -38,7 +51,7 @@ export default function Tab() {
             [{
                 text: "YES",
                 onPress: async () => {
-                    AsyncStorage.clear()
+                    await dropDatabasePLEASEUSECAREFULLY()
                 }
             },
             {
@@ -75,6 +88,22 @@ export default function Tab() {
           </Text>
         </TouchableOpacity>
       </View>
+      <View
+              style={{
+                position: "absolute",
+                bottom: 20,
+                width: "100%",
+                alignItems: "center",
+              }}
+            >
+              <Button
+                label={"Save setting"}
+                onPress={async () => {
+                  await AsyncStorage.setItemAsync("apiKey", apiUrl)
+                  setApiUrl("")
+                }}
+              />
+            </View>
     </View>
   );
 }

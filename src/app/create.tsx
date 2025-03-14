@@ -5,23 +5,19 @@ import { useState } from "react";
 import { AsyncStorage } from "expo-sqlite/kv-store";
 import { router } from "expo-router";
 import {useTranslation} from 'react-i18next'
+import { addClass } from "../misc/database";
+import { useSQLiteContext } from "expo-sqlite";
 
 export default function Create() {
   const {t} = useTranslation();
-
+  const database = useSQLiteContext()
+  
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
   const addClassCardAsync = async (name: string, description: string) => {
     try {
-      const valueString = await AsyncStorage.getItem("main");
-      const value = valueString ? JSON.parse(valueString) : [];
-      value.push({
-        id: value.length,
-        name: name,
-        description: description,
-      });
-      await AsyncStorage.setItem("main", JSON.stringify(value));
+      addClass(database, name, description)
     } catch (e) {
       console.error("Failed to save data:", e);
     }

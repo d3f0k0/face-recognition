@@ -3,7 +3,8 @@
   "slug": "attendance-rewrite",
   "plugins": [
     "expo-router",
-    "expo-localization"
+    "expo-localization",
+    "expo-sqlite"
   ],
   "scheme": "attendance",
   "newArchEnabled": true,

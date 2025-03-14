@@ -3,19 +3,25 @@ import { ScrollView, StyleSheet, View, Text } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Fab from "../../components/Fab";
 import { router, useFocusEffect } from "expo-router";
-import AsyncStorage from "expo-sqlite/kv-store";
-import { ClassCardType, ClassCard } from "../../components/ClassCard";
+import { ClassCard } from "../../components/ClassCard";
+import {Class} from '../../misc/types'
+import * as SQLite from 'expo-sqlite'
+import {useClassStore, useLoadingStore} from '../../misc/stores'
 
 export default function Index() {
-  const [classCards, setClassCards] = useState<ClassCardType[] | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [classCards, setClassCards] = useState<Class[] | null>(null);
+  const {setById} = useClassStore()
+  const loadingStore = useLoadingStore()
+  let database = SQLite.useSQLiteContext()
 
   const loadData = useCallback(async () => {
     try {
-      setLoading(true);
-      const data = await AsyncStorage.getItem("main");
-      if (data) {
-        setClassCards(JSON.parse(data));
+      loadingStore.startLoading
+      let classCardsCollection: Class[] = await database.getAllAsync(
+        "SELECT * FROM classes"
+      )
+      if (classCardsCollection) {
+        setClassCards(classCardsCollection);
       } else {
         setClassCards([]);
       }
@@ -23,7 +29,7 @@ export default function Index() {
       console.error("Failed to load data:", error);
       setClassCards([]);
     } finally {
-      setLoading(false);
+      loadingStore.stopLoading
     }
   }, []);
 
@@ -37,7 +43,7 @@ export default function Index() {
     }, [loadData])
   );
 
-  if (loading) {
+  if (loadingStore.isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <Text>Loading...</Text>
@@ -53,9 +59,10 @@ export default function Index() {
             <ClassCard
               key={classItem.id}
               id={classItem.id}
-              title={classItem.name}
+              title={classItem.className}
               description={classItem.description}
-              onPress={() => {
+              onPress={async () => {
+                await setById(classItem.id, database)
                 router.push(`/${classItem.id}`);
               }}
             />

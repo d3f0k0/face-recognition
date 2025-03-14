@@ -1,11 +1,18 @@
-import {readAsStringAsync, EncodingType} from 'expo-file-system';
-import { zlibSync, unzlibSync, strToU8, strFromU8 } from "fflate";
-import {fetch} from 'expo/fetch'; // Correct import
+import { readAsStringAsync, EncodingType } from 'expo-file-system';
+import { router } from 'expo-router';
+import { AsyncStorage } from "expo-sqlite/kv-store";
+import { fetch } from 'expo/fetch'; // Correct import
+import { Alert } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+
+import { saveBase64ToFile } from './result_process';
+import { useStudentStore, useLoadingStore } from './stores';
+import { generateRandomBase64 } from "./utils"
 
 
 let url = ""
 
-url = "https://dedicated-comm-catalyst-absent.trycloudflare.com"
+url = "https://poem-amongst-nationally-domains.trycloudflare.com"
 
 export const getEmbeddings = async (imageUri) => {
   const base64Image = await readAsStringAsync(imageUri, {
@@ -34,64 +41,6 @@ export const getEmbeddings = async (imageUri) => {
     console.error("Error during fetch:", error.message);
   }
 };
-
-export const getEmbeddingsCompressed = async (imageUri: string) => {
-  try {
-    // Convert the image to Base64
-    const base64Image = await readAsStringAsync(imageUri, {
-      encoding: EncodingType.Base64,
-    });
-
-    // Prepare the payload
-    const payload = JSON.stringify({ image: base64Image });
-
-    // Compress the payload with fflate
-    const compressedPayload = zlibSync(strToU8(payload)); // Convert string to Uint8Array and compress
-
-    // API endpoint
-    const apiUrl = `${url}/generate-embedding-compressed`;
-
-    // Make the POST request with compressed data
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Content-Encoding": "zstd", // Specify Zstd encoding
-        "Accept-Encoding": "zstd", // Accept compressed responses
-      },
-      body: compressedPayload, // Send the compressed payload
-    });
-
-    // Check for server response status
-    if (!response.ok) {
-      console.error("Server error:", response.status, response.statusText);
-      return null;
-    }
-
-    // Read the response as an ArrayBuffer
-    const arrayBuffer = await response.arrayBuffer();
-
-    // Convert ArrayBuffer to Uint8Array for decompression
-    const responseData = new Uint8Array(arrayBuffer);
-
-    // Decompress the response if Content-Encoding is zstd
-    let decompressedData: Uint8Array;
-    if (response.headers.get("Content-Encoding") === "zstd") {
-      decompressedData = unzlibSync(responseData); // Decompress using fflate
-    } else {
-      decompressedData = responseData; // If not compressed, use as is
-    }
-
-    // Parse the decompressed data as JSON
-    const data = JSON.parse(strFromU8(decompressedData)); // Convert Uint8Array to string and parse JSON
-
-    return [data.embedding, data.face]; // Return embeddings and face
-  } catch (error) {
-    console.error("Error during fetch:", error.message);
-    return null;
-  }
-};
-
 
 export const recognizeWithEmbeddings = async (imageUri, embeddings) => {
   try {
@@ -136,67 +85,58 @@ export const recognizeWithEmbeddings = async (imageUri, embeddings) => {
 };
 
 
-export const recognizeWithEmbeddingsCompressed = async (imageUri: string, embeddings: any[]) => {
-  try {
-    // Convert the image to Base64
-    const base64Image = await readAsStringAsync(imageUri, {
-      encoding: EncodingType.Base64,
-    });
-
-    // Prepare the payload
-    const payload = JSON.stringify({
-      image: base64Image,
-      embeddings, // Embeddings list
-    });
-
-    // Compress the payload with fflate
-    const compressedPayload = zlibSync(strToU8(payload)); // Convert string to Uint8Array and compress
-
-    // API endpoint
-    const apiUrl = `${url}/recognize-with-embeddings-compressed`;
-
-    // Make the POST request with compressed data
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Content-Encoding": "zstd", // Specify Zstd encoding
-        "Accept-Encoding": "zstd", // Accept compressed responses
-      },
-      body: compressedPayload, // Send the compressed payload
-    });
-
-    // Check for server response status
-    if (!response.ok) {
-      console.error("Server error:", response.status, response.statusText);
-      return null;
-    }
-
-    // Read the response as an ArrayBuffer
-    const arrayBuffer = await response.arrayBuffer();
-
-    // Convert ArrayBuffer to Uint8Array for decompression
-    const responseData = new Uint8Array(arrayBuffer);
-
-    // Decompress the response if Content-Encoding is zstd
-    let decompressedData: Uint8Array;
-    if (response.headers.get("Content-Encoding") === "zstd") {
-      decompressedData = unzlibSync(responseData); // Decompress using fflate
-    } else {
-      decompressedData = responseData; // If not compressed, use as is
-    }
-
-    // Parse the decompressed data as JSON
-    const data = JSON.parse(strFromU8(decompressedData)); // Convert Uint8Array to string and parse JSON
-
-    if (data.recognition_results) {
-      return data.recognition_results; // Return recognition results
-    } else {
-      console.warn("Unexpected response format:", data);
-      return null;
-    }
-  } catch (error) {
-    console.error("Error during fetch:", error.message);
-    return null;
+export async function takePhoto(id: number) {
+  const { currentStudentList } = useStudentStore()
+  const { startLoading, stopLoading } = useLoadingStore()
+  const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+  if (!permissionResult.granted) {
+    Alert.alert("Permission Required", "You need to grant camera permissions to take a photo.");
+    return;
   }
-};
+  // const result = await ImagePicker.launchCameraAsync({
+  //   allowsEditing: true,
+  //   quality: 1,
+  // });
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    quality: 1,
+  });
+
+  if (!result.canceled) {
+    let embeddingList = []
+    for (const student of currentStudentList) {
+      embeddingList.push({
+        name: student.id,
+        embedding: student.embedding
+      })
+    }
+    try {
+      startLoading
+      let resultReturned = []
+      const apiResult = await recognizeWithEmbeddings(result.assets[0].uri, embeddingList)
+      let returnResult;
+      try {
+        returnResult = typeof apiResult === "string" ? JSON.parse(apiResult) : apiResult;
+      } catch (parseError) {
+        console.error("Error parsing API result:", parseError);
+        return;
+      }
+      for (const item of returnResult) {
+        let randomBase64 = await generateRandomBase64(16)
+        resultReturned.push({
+          face: await saveBase64ToFile(item.face, `${returnResult.indexOf(item)}_${randomBase64}.jpg`),
+          best_match: item.best_match == "No matches found" ? null : item.best_match,
+          matches: item.best_match == "No matches found" ? null : item.matches,
+        })
+      }
+      console.log(resultReturned)
+      await AsyncStorage.setItem("temp_results", JSON.stringify(resultReturned));
+    } catch (e) {
+      console.log(e)
+    } finally {
+      stopLoading
+      router.navigate(`/${id}/result`)
+    }
+  }
+}

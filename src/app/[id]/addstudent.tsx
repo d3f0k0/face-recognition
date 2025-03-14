@@ -1,40 +1,25 @@
+import { useState } from "react";
 import { View, StyleSheet, Text } from "react-native";
+import { router, Stack, useLocalSearchParams } from "expo-router";
+import { useTranslation } from 'react-i18next'
+import { useSQLiteContext } from "expo-sqlite";
+
 import CreateButton from "../../components/create/CreateButton";
 import CreateForm from "../../components/create/CreateForm";
-import { useState } from "react";
-import { AsyncStorage } from "expo-sqlite/kv-store";
-import { router, Stack, useLocalSearchParams } from "expo-router";
-import ImagePickerComponent from "../../components/ImagePicker";
-import { getEmbeddings, getEmbeddingsCompressed } from "../../misc/recognition_backend";
 import Spinner from "../../components/Spinner";
-import { saveBase64ToFile } from "../../misc/result_process";
-import { useTranslation } from 'react-i18next'
+import ImagePickerComponent from "../../components/ImagePicker";
+import { getEmbeddings } from "../../misc/recognition_backend";
+import { saveBase64ToFile } from "../../misc/utils";
+import { addStudent } from "../../misc/database";
 
 export default function AddStudent() {
     const { t } = useTranslation()
     const { id } = useLocalSearchParams()
+    const database = useSQLiteContext()
+
     const [name, setName] = useState("");
     const [image, setImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const tableID = "table_" + id
-
-    const addStudentAsync = async (name: string, image: string, hadEmbedding: boolean, embedding?: any, embeddingFace?: any) => {
-        try {
-            const valueString = await AsyncStorage.getItem(tableID);
-            const value = valueString ? JSON.parse(valueString) : [];
-            value.push({
-                id: value.length,
-                name: name,
-                image: image,
-                hadEmbedding: hadEmbedding,
-                embedding: hadEmbedding ? embedding : '',
-                embeddingFace: hadEmbedding ? embeddingFace : ''
-            });
-            await AsyncStorage.setItem(tableID, JSON.stringify(value));
-        } catch (e) {
-            console.error("Failed to save data:", e);
-        }
-    };
 
     return (
         <View
@@ -84,18 +69,16 @@ export default function AddStudent() {
                             let embedding = await getEmbeddings(image)
                             console.log(embedding)
                             if (embedding != null) {
-                                await addStudentAsync(name, image, true, embedding[0], await saveBase64ToFile(embedding[1], `${name}.jpg`));
-                                setName("");
-                                router.back();
+                                await addStudent(database ,name, Number(id), image, embedding[0], await saveBase64ToFile(embedding[1], `${name}.jpg`));
                             }
                             else {
-                                await addStudentAsync(name, image, false);
-                                setName("");
-                                router.back();
+                                await addStudent(database, name, Number(id), image, null);
                             }
+                            setName("");
+                            router.back();
 
                         } catch (e) {
-                            await addStudentAsync(name, image, false);
+                            await addStudent(database, name,Number(id), image, null);
                             setName("");
                             router.back();
                             console.log(e)

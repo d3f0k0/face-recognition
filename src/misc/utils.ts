@@ -1,4 +1,23 @@
+import * as Crypto from 'expo-crypto'
 import * as FileSystem from 'expo-file-system';
+
+export const generateRandomBase64 = async (length) => {
+    try {
+        // Generate random bytes using expo-crypto
+        const randomBytes = await Crypto.getRandomBytesAsync(length);
+
+        // Convert the random bytes into a string
+        let string = '';
+        for (let i = 0; i < randomBytes.length; i++) {
+            string += String.fromCharCode(randomBytes[i]);
+        }
+
+        // Return the Base64 encoded string
+        return btoa(string);
+    } catch (error) {
+        console.error("Error generating random Base64:", error);
+    }
+};
 
 /**
  * Save a Base64 string as an image file and return its URI.
@@ -33,5 +52,3 @@ export const saveBase64ToFile = async (base64String, fileName) => {
       console.error("Error saving Base64 to file:", error);
   }
 };
-
-
