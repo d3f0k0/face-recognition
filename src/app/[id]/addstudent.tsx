@@ -11,6 +11,7 @@ import ImagePickerComponent from "../../components/ImagePicker";
 import { getEmbeddings } from "../../misc/recognition_backend";
 import { saveBase64ToFile } from "../../misc/utils";
 import { addStudent } from "../../misc/database";
+import AsyncStorage from "expo-sqlite/kv-store";
 
 export default function AddStudent() {
     const { t } = useTranslation()
@@ -65,8 +66,10 @@ export default function AddStudent() {
                     label={"Create"}
                     onPress={async () => {
                         setLoading(true)
+                        const recognitionUrl = await AsyncStorage.getItemAsync("apiKey")
+                        console.log(recognitionUrl)
                         try {
-                            let embedding = await getEmbeddings(image)
+                            let embedding = await getEmbeddings(recognitionUrl, image)
                             console.log(embedding)
                             if (embedding != null) {
                                 await addStudent(database ,name, Number(id), image, embedding[0], await saveBase64ToFile(embedding[1], `${name}.jpg`));

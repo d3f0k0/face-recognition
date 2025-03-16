@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { ScrollView, StyleSheet, View, Text } from "react-native";
+import { ScrollView, StyleSheet, View, Text, Alert } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Fab from "../../components/Fab";
 import { router, useFocusEffect } from "expo-router";
@@ -7,16 +7,18 @@ import { ClassCard } from "../../components/ClassCard";
 import {Class} from '../../misc/types'
 import * as SQLite from 'expo-sqlite'
 import {useClassStore, useLoadingStore} from '../../misc/stores'
+import { useTranslation } from "react-i18next";
 
 export default function Index() {
+  const {t} = useTranslation()
   const [classCards, setClassCards] = useState<Class[] | null>(null);
   const {setById} = useClassStore()
-  const loadingStore = useLoadingStore()
+  const {startLoading, stopLoading, isLoading} = useLoadingStore()
   let database = SQLite.useSQLiteContext()
 
   const loadData = useCallback(async () => {
     try {
-      loadingStore.startLoading
+      startLoading()  // Fixed: Added parentheses to call the function
       let classCardsCollection: Class[] = await database.getAllAsync(
         "SELECT * FROM classes"
       )
@@ -29,21 +31,18 @@ export default function Index() {
       console.error("Failed to load data:", error);
       setClassCards([]);
     } finally {
-      loadingStore.stopLoading
+      stopLoading()  // Fixed: Added parentheses to call the function
     }
-  }, []);
-
-  useEffect(() => {
-    loadData(); // Initial load when component mounts
-  }, [loadData]);
+  }, [database]);  // Added missing dependencies
 
   useFocusEffect(
     useCallback(() => {
-      loadData(); // Re-load data when screen is focused
+      loadData();
+      Alert.alert(t('beta_warning'), t('beta_warning_description')) // JANKNESS WARNING LOL
     }, [loadData])
   );
 
-  if (loadingStore.isLoading) {
+  if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <Text>Loading...</Text>

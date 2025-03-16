@@ -2,6 +2,7 @@ import { create } from "zustand";
 import * as SQLite from "expo-sqlite";
 
 import { Class, Student } from './types'
+import {getLatestRecognitionResult} from './database'
 
 interface ClassState {
     selectedClass: Class | null
@@ -17,6 +18,12 @@ interface LoadingState {
     isLoading: boolean,
     startLoading: () => void,
     stopLoading: () => void
+}
+
+interface RecognitionState {
+    latestResults: any[];
+    setLatestResults: (results: any[]) => void;
+    loadLatestResults: (classID: number, database: SQLite.SQLiteDatabase) => Promise<void>;
 }
 
 export const useClassStore = create<ClassState>()((set) => ({
@@ -52,3 +59,12 @@ export const useLoadingStore = create<LoadingState>()((set) => ({
     startLoading: () => set(() => ({isLoading: true})),
     stopLoading: () => set(() => ({isLoading: false}))
 }))
+
+export const useRecognitionStore = create<RecognitionState>()((set) => ({
+    latestResults: [],
+    setLatestResults: (results) => set({ latestResults: results }),
+    loadLatestResults: async (classID, database) => {
+        const results = await getLatestRecognitionResult(database, classID);
+        set({ latestResults: results });
+    }
+}));

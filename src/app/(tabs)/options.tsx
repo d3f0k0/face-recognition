@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 
 import CreateForm from '../../components/create/CreateForm';
 import Button from '../../components/Button';
-import { dropDatabasePLEASEUSECAREFULLY } from "../../misc/database"
+import { dropDatabasePLEASEUSECAREFULLY, clearAllData } from "../../misc/database"
+import { useSQLiteContext } from 'expo-sqlite';
 
 
 export default function Tab() {
@@ -14,7 +15,7 @@ export default function Tab() {
   const [apiUrl, setApiUrl] = useState('')
 
   const [apiPlaceholder, setApiPlaceholder] = useState('')
-
+  const database = useSQLiteContext()
   const getPlaceholder = useCallback(async () => {
     const apiPlaceholderText = await AsyncStorage.getItemAsync("apiKey")
     setApiPlaceholder(apiPlaceholderText)
@@ -44,26 +45,48 @@ export default function Tab() {
             fontSize: 20
         }
       ]}>{t('settings.dangerous')}</Text>
-      <Button 
-        label={t('settings.delete_everything')} 
-        icon={<Ionicons name="trash" size={24} color="white" />}
-        onPress={() => Alert.alert("Are you sure?", "You will delete everything!", 
-            [{
-                text: "YES",
-                onPress: async () => {
-                    await dropDatabasePLEASEUSECAREFULLY()
+      <View style={styles.dangerZone}>
+        <Button 
+            label={t('settings.clear_data')}
+            icon={<Ionicons name="trash-outline" size={24} color="white" />}
+            onPress={() => Alert.alert(
+                "Clear all data?", 
+                "This will remove all classes, students and recognition results, but keep the database structure.", 
+                [{
+                    text: "YES",
+                    onPress: async () => {
+                        await clearAllData(database)
+                    }
+                },
+                {
+                    text: "NO"
                 }
-            },
-            {
-                text: "NO"
-            }
-        ], {cancelable: true})}
-        style={
-            styles.delete_button
-        }
-        color={styles.delete_button_color}
+            ], {cancelable: true})}
+            style={styles.warning_button}
+            color={styles.warning_button_color}
         />
-        <Text style={[
+        
+        <Button 
+            label={t('settings.reset_database')}
+            icon={<Ionicons name="nuclear" size={24} color="white" />}
+            onPress={() => Alert.alert(
+                "Reset database?", 
+                "This will completely reset the database structure. All data will be lost! Are you really sure?", 
+                [{
+                    text: "YES",
+                    onPress: async () => {
+                        await dropDatabasePLEASEUSECAREFULLY(database)
+                    }
+                },
+                {
+                    text: "NO"
+                }
+            ], {cancelable: true})}
+            style={styles.delete_button}
+            color={styles.delete_button_color}
+        />
+      </View>
+      <Text style={[
         {
             fontSize: 20
         }
@@ -114,11 +137,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
+  dangerZone: {
+    gap: 10,
+    marginVertical: 10,
+  },
+  warning_button: {
+    color: 'white'
+  },
+  warning_button_color: {
+    backgroundColor: '#ff9800'
+  },
   delete_button: {
     color: 'white'
   },
   delete_button_color: {
-    backgroundColor: 'red'
+    backgroundColor: '#f44336'
   }
 });

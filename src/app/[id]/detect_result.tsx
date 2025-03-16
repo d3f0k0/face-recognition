@@ -1,11 +1,11 @@
-import { View, Text, ScrollView, StyleSheet, Image } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Image, Alert } from "react-native";
 import Card from "../../components/Card";
-import { router, Stack, useLocalSearchParams } from "expo-router";
-import AsyncStorage from "expo-sqlite/kv-store";
+import { router, Stack, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useState, useCallback, useEffect } from "react";
 import Button from "../../components/Button";
-import { Student } from "../../misc/types";
 import { useTranslation } from "react-i18next";
+import { useRecognitionStore, useStudentStore } from "../../misc/stores";
+import { useSQLiteContext } from "expo-sqlite";
 
 export interface ResultType {
     face: any
@@ -21,90 +21,30 @@ interface MatchType {
 
 export default function DetectResult() {
     const {t} = useTranslation()
-
+    const database = useSQLiteContext()
     const { id } = useLocalSearchParams();
-    const tableID = "table_" + id;
     const [loading, setLoading] = useState(true);
-    const [resultData, setResultData] = useState<ResultType[] | null>();
-    const [studentData, setStudentData] = useState<Student[] | null>();
-    let list_result_temp_2 = []
-    const loadData = useCallback(async () => {
-        try {
-            setLoading(true);
-            const resultListData = JSON.parse(await AsyncStorage.getItem("temp_results"));
-            if (resultListData) {
-                setResultData(resultListData);
-                for (let i = 0; i < resultListData.length; i++) {
-                    let result: ResultType = resultListData[i];
-                    if (result.best_match && result.best_match.name !== undefined && result.best_match.name !== null) {
-                        const parsedName = parseInt(result.best_match.name);
-                        const parseCheck2 = !isNaN(parsedName) ? parsedName : null; // Ensure valid integer
-                        // Explicitly check for null and undefined
-                        if (parseCheck2 !== null && parseCheck2 !== undefined) {
-                            if (list_result_temp_2.includes(parseCheck2)) {
-                                // Handle duplicates by iterating through matches
-                                if (result.matches && result.matches.length > 0) {
-                                    for (let j = 0; j < result.matches.length; j++) {
-                                        const matches_result = result.matches[j];
-                                        let parseName2 = parseInt(matches_result.name);
-                                        if (!isNaN(parseName2) && !list_result_temp_2.includes(parseName2)) {
-                                            console.log(`{
-                                                face: ${result.face},
-                                                best_match: {
-                                                    name: ${result.matches[j].name},
-                                                    similarity: ${result.matches[j].similarity}
-                                                }`)
-                                            list_result_temp_2.push({
-                                                face: result.face,
-                                                best_match: {
-                                                    name: result.matches[j].name,
-                                                    similarity: result.matches[j].similarity
-                                                }, 
-                                            });
-                                            break; // Stop after adding the first valid unique match
-                                        }
-                                    }
-                                }
-                            } else {                     
-                                    list_result_temp_2.push({
-                                    face: result.face,
-                                    best_match: {
-                                        name: result.best_match.name,
-                                        similarity: result.best_match.similarity
-                                    }, 
-                                });
-                            }
-                        }
-                    } else {
-                        list_result_temp_2.push({
-                            face: result.face,
-                            best_match: null
-                        });
+
+    const {latestResults, loadLatestResults} = useRecognitionStore()
+    const {currentStudentList} = useStudentStore()
+
+        useFocusEffect(
+            useCallback(() => {
+                const loadData = async () => {
+                    setLoading(true);
+                    try {
+                        await loadLatestResults(Number(id), database);
+                        console.log(latestResults)
+                    } catch (e) {
+                        console.error(e);
+                        Alert.alert("Error", "Failed to load recognition results");
+                    } finally {
+                        setLoading(false);
                     }
-                    console.log("test")
-                    console.log(list_result_temp_2)
-                }
-            } else {
-                setResultData([]);
-            }
-            const studentListData = JSON.parse(await AsyncStorage.getItem(tableID));
-            if (studentListData) {
-                setStudentData(studentListData);
-            } else {
-                setStudentData([]);
-            }
-
-        } catch (error) {
-
-            console.error("Failed to load data:", error);
-        } finally {
-            setLoading(false);
-        }
-    }, [id, tableID]);
-
-    useEffect(() => {
-        loadData();
-    }, [loadData]);
+                };
+                loadData();
+            }, [id, database, loadLatestResults])
+        );
 
 
     if (loading) {
@@ -122,7 +62,7 @@ export default function DetectResult() {
                     }}
             />
             <ScrollView>
-                {resultData && resultData.map((resultItem, index) => {
+                {latestResults && latestResults.map((resultItem, index) => {
                     return (
                         <View key={index}>
                             <Card style={styles.card}>
@@ -130,11 +70,11 @@ export default function DetectResult() {
                                     <Image source={{uri: resultItem.face}}
                                     style={{ width: 80, height: 80, backgroundColor: 'grey' }}
                                     />
-                                    {(resultItem.best_match) ? (
+                                    {(resultItem.similarity) ? (
                                             <View>
-                                                <Text>{resultItem.best_match.name}</Text>
-                                                <Text>{studentData[parseInt(resultItem.best_match.name)].studentName}</Text>
-                                                <Text>{resultItem.best_match.similarity}</Text>
+                                                <Text>{resultItem.studentID}</Text>
+                                                <Text>{resultItem.studentName}</Text>
+                                                <Text>{resultItem.similarity}</Text>
                                             </View>
                                         ) : (
                                             <Text>No matches found</Text>) }

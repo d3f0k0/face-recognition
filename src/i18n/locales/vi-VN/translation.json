@@ -5,7 +5,8 @@
     },
     "settings": {
         "dangerous": "Nguy hiểm!",
-        "delete_everything" : "Xóa hết toàn bộ dữ liệu"
+        "clear_data" : "Xóa hết toàn bộ dữ liệu",
+        "reset_database": "Thiết lập lại ứng dụng!"
     },
     "create" : {
         "class": {
@@ -37,5 +38,7 @@
         },
         "detect_result": "Kết quả phát hiện",
         "return": "Trở lại"
-    } 
+    },
+    "beta_warning" : "Beta Warning!",
+    "beta_description": "Hiện tại server nhận diện khuôn mặt chưa được thiết lập. Thiết lập server bằng cách vào đường link sau: https://colab.research.google.com/drive/1t1XC6PS4xGCFnM__clROl-wtuRJemQMZ?usp=sharing và chạy, liên kết server bằng cách copy đường dẫn running on và vào cài đặt ứng dụng , dán link vào api url và lưu cài đặt."
 }

@@ -12,3 +12,11 @@ export interface Student {
   embedding?: any
   embeddingURL?: any
 }
+
+export interface RecognitionResult {
+  face: string;
+  best_match?: {
+      name: string;
+      similarity: number;
+  };
+}

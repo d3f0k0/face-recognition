@@ -5,7 +5,8 @@
     },
     "settings": {
         "dangerous": "Dangerous!",
-        "delete_everything" : "DELETE EVERYTHING!"
+        "clear_data" : "CLEAR ALL DATA!",
+        "reset_database": "RESET DATA!"
     },
     "create" : {
         "class": {
