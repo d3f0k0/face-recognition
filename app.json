@@ -28,7 +28,10 @@
     }
   },
   "ios": {
-    "bundleIdentifier": "com.defoko.facerecognitionapp"
+    "bundleIdentifier": "com.defoko.facerecognitionapp",
+    "infoPlist": {
+      "ITSAppUsesNonExemptEncryption": false
+    }
   },
   "owner": "defoko",
   "splash": {

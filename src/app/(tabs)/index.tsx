@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { ScrollView, StyleSheet, View, Text, Alert } from "react-native";
+import { ScrollView, StyleSheet, View, Text, Alert, Linking } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Fab from "../../components/Fab";
 import { router, useFocusEffect } from "expo-router";
@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 export default function Index() {
   const {t} = useTranslation()
   const [classCards, setClassCards] = useState<Class[] | null>(null);
+  const [isFirstLoad, setFirstLoad] = useState(true);
   const {setById} = useClassStore()
   const {startLoading, stopLoading, isLoading} = useLoadingStore()
   let database = SQLite.useSQLiteContext()
@@ -35,10 +36,22 @@ export default function Index() {
     }
   }, [database]);  // Added missing dependencies
 
+  useEffect(() => {
+    if (isFirstLoad) {
+      Alert.alert(t('beta_warning'), t('beta_warning_description'), [{
+        text: `${t("beta_redirect")}`,
+        onPress: () => {
+          Linking.openURL("https://colab.research.google.com/drive/1t1XC6PS4xGCFnM__clROl-wtuRJemQMZ?usp=sharing")
+        }
+      },  {
+        text: "OK"
+      }]) // JANKNESS WARNING LOL
+    }
+  }, [isFirstLoad])
+
   useFocusEffect(
     useCallback(() => {
       loadData();
-      Alert.alert(t('beta_warning'), t('beta_warning_description')) // JANKNESS WARNING LOL
     }, [loadData])
   );
 

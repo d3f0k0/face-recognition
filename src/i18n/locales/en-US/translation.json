@@ -38,5 +38,8 @@
         },
         "detect_result": "Detect Result",
         "return": "Return"
-    } 
+    },
+    "beta_warning" : "Beta Warning!",
+    "beta_warning_description": "Currently, the recognition server isn't hosted yet, so you have to host your own. Click the link below to open the colab page which run the server. You need to paste the hosting link to the api key setting to able to connect.",
+    "beta_redirect" : "Open Colab link"
 }
