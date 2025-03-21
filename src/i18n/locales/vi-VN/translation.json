@@ -41,5 +41,12 @@
     },
     "beta_warning" : "Beta Warning!",
     "beta_warning_description": "Hiện tại server nhận diện khuôn mặt chưa được thiết lập. Thiết lập server bằng cách vào đường link phía dưới và chạy, liên kết server bằng cách copy đường dẫn running on và vào cài đặt ứng dụng , dán link vào api url và lưu cài đặt.",
-    "beta_redirect" : "Mở đường link"
+    "beta_redirect" : "Mở đường link",
+    "student": {
+        "delete_label" : "Xoá học sinh",
+        "delete_confirm_title": "Xóa?",
+        "delete_confirm_message": "Bạn có chắc không?",
+        "cancel": "Hủy",
+        "delete": "Xóa"
+    }
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { SQLiteDatabase, useSQLiteContext } from "expo-sqlite";
@@ -7,6 +7,8 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
 import * as ImagePicker from 'expo-image-picker'
+import { BottomSheetModalProvider, BottomSheetView, BottomSheetModal } from "@gorhom/bottom-sheet";
+
 
 import Card from "../../components/Card";
 import { useClassStore, useLoadingStore, useStudentStore } from "../../misc/stores";
@@ -15,7 +17,8 @@ import Fab from "../../components/Fab";
 import { recognizeWithEmbeddings } from '../../misc/recognition_backend'
 import { generateRandomBase64, saveBase64ToFile } from '../../misc/utils'
 import Spinner from "../../components/Spinner";
-import {addRecognitionResultBatch} from "../../misc/database";
+import {addRecognitionResultBatch, removeStudentByID} from "../../misc/database";
+import { Student } from "../../misc/types";
 
 
 
@@ -26,8 +29,17 @@ export default function Index() {
 
     const { selectedClass } = useClassStore()
     const { currentStudentList, setById } = useStudentStore()
-
     const [spinning, setSpinning] = useState(false)
+    const [selected, setSelected] = useState<Student>()
+
+    const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+    const handlePresentModalPress = useCallback(() => {
+      bottomSheetModalRef.current?.present();
+    }, []);
+    const handleSheetChanges = useCallback((index: number) => {
+      console.log('handleSheetChanges', index);
+    }, []);
 
     const loadData = useCallback((idNum: number, db: SQLiteDatabase) => {
         setById(idNum, db)
@@ -111,7 +123,8 @@ export default function Index() {
     )
 
     return (
-        <View style={{ flex: 1, padding: 15 }}>
+        <BottomSheetModalProvider>
+            <View style={{ flex: 1, padding: 15 }}>
             {/* class Card */}
             <Card style={{}}>
                 <Text style={{ fontSize: 32, fontWeight: 'bold', textAlign: 'center' }}>
@@ -146,7 +159,8 @@ export default function Index() {
                                             <MaterialIcons name="check" size={24} color="black" />
                                         ) : (<MaterialIcons name="close" size={24} color="black" />)}
                                         <TouchableOpacity style={styles.icon} onPress={() => {
-
+                                            setSelected(student)
+                                            handlePresentModalPress()
                                         }}>
                                             <MaterialIcons name="more-vert" size={40} color="black" />
                                         </TouchableOpacity>
@@ -164,7 +178,61 @@ export default function Index() {
                 size={70}
                 onPress={() => router.push(`/${id}/addstudent`)} // Navigate to AddStudent
             />
+            {/* Bottom Sheet */}
+            <BottomSheetModal
+                ref={bottomSheetModalRef}
+                onChange={handleSheetChanges}
+                onDismiss={() => {setSelected(null)}}
+            >
+                <BottomSheetView style={styles.bottomSheetContent}>
+                    {selected != null ? (
+                        <View style={styles.bottomSheetContainer}>
+                            <View style={styles.studentInfo}>
+                                <Image source={{ uri: selected.embeddingURL }} style={styles.bottomSheetImage} />
+                                <View style={styles.studentDetails}>
+                                    <Text style={styles.studentName}>{selected.studentName}</Text>
+                                    <Text>ID: {selected.id}</Text>
+                                </View>
+                            </View>
+                            <Button 
+                                label={t('student.delete_label')}
+                                onPress={() => {
+                                    Alert.alert(
+                                        t('student.delete_confirm_title'),
+                                        t('student.delete_confirm_message'),
+                                        [
+                                            {
+                                                text: t('student.cancel'),
+                                                style: 'cancel'
+                                            },
+                                            {
+                                                text: t('student.delete'),
+                                                style: 'destructive',
+                                                onPress: async () => {
+                                                    try {
+                                                        await removeStudentByID(database, selected.id);
+                                                        bottomSheetModalRef.current?.dismiss();
+                                                        loadData(Number(id), database);
+                                                    } catch (error) {
+                                                        console.error('Failed to delete student:', error);
+                                                        Alert.alert(t('error.delete_failed'));
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    );
+                                }}
+                                style={styles.deleteButton}
+                                color={styles.deleteButtonColor}
+                            />
+                        </View>
+                    ) : (
+                        <View></View>
+                    )}
+                </BottomSheetView>
+            </BottomSheetModal>
         </View>
+        </BottomSheetModalProvider>
     )
 }
 
@@ -198,5 +266,34 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
     },
-
+    bottomSheetContent: {
+        padding: 16,
+    },
+    bottomSheetContainer: {
+        gap: 16,
+    },
+    studentInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    bottomSheetImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 3,
+    },
+    studentDetails: {
+        flex: 1,
+    },
+    studentName: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    deleteButton: {
+        marginTop: 8,
+        color: 'white',
+    },
+    deleteButtonColor: {
+        backgroundColor: '#dc3545',
+    },
 });

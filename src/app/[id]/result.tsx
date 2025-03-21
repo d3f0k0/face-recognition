@@ -103,8 +103,13 @@ export default function Result() {
                             }} />
                     </View>
                 </Card>
-                { currentStudentList
-                    .filter((student) => !latestResults.includes(student.id))
+                {currentStudentList
+                    .filter((student) => {
+                        // Check if this student's ID is not in the latestResults
+                        return !latestResults.some(result => 
+                            result.studentID === student.id
+                        );
+                    })
                     .map((student, index) => (
                         <View key={index}>
                             <Card style={styles.card}>
